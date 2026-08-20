@@ -5,28 +5,34 @@ from typing import Callable
 
 from kano_ring.strip import MockColor, is_mock_mode
 
-RED = (255, 0, 0)
 OFF = (0, 0, 0)
 
+# Brightness levels for the racing trail (head first, then fading tail).
+# An asymmetric trail makes a full-ring rotation visible; two identical
+# opposite lights would look stuck on half the circle.
+TRAIL_BRIGHTNESS = (255, 140, 50)
 
-def lit_indices(num_pixels: int, offset: int, light_count: int = 2) -> list[int]:
-    """Return LED indices lit for one frame of the racing red animation."""
-    if num_pixels <= 0 or light_count <= 0:
+
+def trail_indices(num_pixels: int, offset: int, trail_length: int) -> list[int]:
+    """Return LED indices for the racing trail (head at offset, then behind)."""
+    if num_pixels <= 0 or trail_length <= 0:
         return []
 
-    spacing = max(1, num_pixels // light_count)
-    return [(offset + index * spacing) % num_pixels for index in range(light_count)]
+    length = min(trail_length, num_pixels)
+    return [(offset - step) % num_pixels for step in range(length)]
 
 
 def frame_colors(
     num_pixels: int,
     offset: int,
-    light_count: int = 2,
+    *,
+    trail: tuple[int, ...] = TRAIL_BRIGHTNESS,
 ) -> list[tuple[int, int, int]]:
-    """Return RGB tuples for each pixel in one animation frame."""
+    """Return RGB tuples for each pixel in one full-ring racing frame."""
     pixels = [OFF] * num_pixels
-    for index in lit_indices(num_pixels, offset, light_count):
-        pixels[index] = RED
+    for step, index in enumerate(trail_indices(num_pixels, offset, len(trail))):
+        level = trail[step]
+        pixels[index] = (level, 0, 0)
     return pixels
 
 
@@ -42,12 +48,12 @@ def apply_racing_red_frame(
     strip,
     offset: int,
     *,
-    light_count: int = 2,
+    trail: tuple[int, ...] = TRAIL_BRIGHTNESS,
     make_color: Callable[[int, int, int], object] | None = None,
 ) -> None:
     """Paint one frame of the racing red animation onto the strip."""
     color_fn = make_color or _make_color
-    colors = frame_colors(strip.numPixels(), offset, light_count)
+    colors = frame_colors(strip.numPixels(), offset, trail=trail)
     for index, rgb in enumerate(colors):
         strip.setPixelColor(index, color_fn(*rgb))
 
@@ -64,18 +70,19 @@ def clear_strip(strip, make_color: Callable[[int, int, int], object] | None = No
 def run_racing_red(
     strip,
     *,
-    light_count: int = 2,
-    delay: float = 0.1,
+    delay: float = 0.08,
+    trail: tuple[int, ...] = TRAIL_BRIGHTNESS,
 ) -> None:
-    """Race red lights around the ring until interrupted with Ctrl+C."""
+    """Race a red trail around the full ring until interrupted with Ctrl+C."""
     strip.begin()
     offset = 0
+    num_pixels = strip.numPixels()
 
     try:
         while True:
-            apply_racing_red_frame(strip, offset, light_count=light_count)
+            apply_racing_red_frame(strip, offset, trail=trail)
             strip.show()
             time.sleep(delay)
-            offset = (offset + 1) % strip.numPixels()
+            offset = (offset + 1) % num_pixels
     except KeyboardInterrupt:
         clear_strip(strip)
