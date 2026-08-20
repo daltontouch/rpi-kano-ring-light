@@ -20,6 +20,13 @@ fi
 
 echo
 echo "Pi install complete."
-echo "Run hardware scripts with sudo and the venv Python:"
-echo "  sudo .venv/bin/python3 scripts/turn_off_leds.py"
+echo
+echo "Option A — activate the venv, then run with sudo:"
+echo "  source .venv/bin/activate"
+echo "  sudo python3 scripts/rainbow_demo.py"
+echo
+echo "Option B — call the venv Python directly:"
 echo "  sudo .venv/bin/python3 scripts/rainbow_demo.py"
+echo
+echo "Option C — wrapper script:"
+echo "  sudo ./scripts/run_pi.sh scripts/rainbow_demo.py"

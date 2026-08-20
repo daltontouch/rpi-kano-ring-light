@@ -37,8 +37,18 @@ python3 -m venv .venv
 Run scripts with the venv Python and `sudo` (needed for DMA/PWM access):
 
 ```bash
-sudo .venv/bin/python3 scripts/turn_off_leds.py
+source .venv/bin/activate
+sudo python3 scripts/turn_off_leds.py
 ```
+
+Or without activating the venv:
+
+```bash
+sudo .venv/bin/python3 scripts/turn_off_leds.py
+sudo ./scripts/run_pi.sh scripts/rainbow_demo.py
+```
+
+Plain `python3 scripts/...` uses system Python and will not see packages installed in `.venv`.
 
 If you must install into system Python anyway (not recommended), add `--break-system-packages` to pip.
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Cycle a simple rainbow pattern across the ring."""
 
+import _bootstrap  # noqa: F401
+
 import time
 
 from kano_ring import create_strip, is_mock_mode

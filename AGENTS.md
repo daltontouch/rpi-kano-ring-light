@@ -10,7 +10,7 @@ Cloud agents run on Ubuntu x86 VMs, not on Raspberry Pi hardware. Follow these r
 - **Run tests with:** `python3 -m pytest -q`
 - **Run demo scripts with:** `python3 scripts/<script>.py` (no `sudo` needed in mock mode)
 - **Hardware-only work** (DMA, PWM, real LED output) must be documented in PR descriptions and verified on a physical Pi. See `.agents/docs/start-here.md` for pin mappings and pitfalls.
-- **On a real Pi**, use a virtual environment (Raspberry Pi OS blocks system-wide pip). Run `./scripts/install_pi.sh`, then use `sudo .venv/bin/python3 scripts/<script>.py` for hardware access.
+- **On a real Pi**, run `./scripts/install_pi.sh`, then use the venv: `source .venv/bin/activate && sudo python3 scripts/<script>.py` (or `sudo .venv/bin/python3 scripts/<script>.py`). Do not use bare system `python3` — it cannot see packages in `.venv`.
 
 ### Project layout
 
