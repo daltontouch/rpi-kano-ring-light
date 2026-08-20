@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Turn off all LEDs on the Kano light ring."""
 
+import _bootstrap  # noqa: F401
+
 from kano_ring import create_strip, is_mock_mode
 from kano_ring.strip import MockColor
 

@@ -13,17 +13,44 @@ Research notes for controlling the Kano Computer Kit light ring on a Raspberry P
 | Driver library | `rpi_ws281x` (not `gpiozero`) |
 | Typical frequency | 800000 Hz |
 | DMA channel | 10 (avoid DMA 5 on Pi 3B) |
-| Run scripts with | `sudo python3 script.py` |
+| Run scripts with | `sudo .venv/bin/python3 script.py` (see Quick Start) |
 
 The ring plugs directly onto the GPIO header. Each LED is individually addressable; you cannot control them with simple digital on/off GPIO calls.
 
 ## Quick Start
 
-Install the Python bindings:
+Raspberry Pi OS (Bookworm and later) blocks system-wide `pip install` (PEP 668). Use a virtual environment instead:
 
 ```bash
-sudo pip3 install rpi-ws281x
+./scripts/install_pi.sh
 ```
+
+Or manually:
+
+```bash
+sudo apt install -y python3-venv python3-full   # if venv is missing
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-pi.txt
+.venv/bin/pip install -e .
+```
+
+Run scripts with the venv Python and `sudo` (needed for DMA/PWM access):
+
+```bash
+source .venv/bin/activate
+sudo python3 scripts/turn_off_leds.py
+```
+
+Or without activating the venv:
+
+```bash
+sudo .venv/bin/python3 scripts/turn_off_leds.py
+sudo ./scripts/run_pi.sh scripts/rainbow_demo.py
+```
+
+Plain `python3 scripts/...` uses system Python and will not see packages installed in `.venv`.
+
+If you must install into system Python anyway (not recommended), add `--break-system-packages` to pip.
 
 Minimal test script:
 
@@ -51,7 +78,7 @@ strip.show()
 Run with:
 
 ```bash
-sudo python3 your_script.py
+sudo .venv/bin/python3 your_script.py
 ```
 
 ## Public GitHub Examples
