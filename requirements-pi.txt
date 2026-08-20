@@ -1,0 +1,2 @@
+-r requirements.txt
+rpi-ws281x>=5.0
