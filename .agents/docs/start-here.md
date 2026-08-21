@@ -13,6 +13,7 @@ Research notes for controlling the Kano Computer Kit light ring on a Raspberry P
 | Driver library | `rpi_ws281x` (not `gpiozero`) |
 | Typical frequency | 800000 Hz |
 | DMA channel | 10 (avoid DMA 5 on Pi 3B) |
+| Brightness | 150 (Kano `KanoHatLeds` default; not 255) |
 | Run scripts with | `sudo .venv/bin/python3 script.py` (see Quick Start) |
 
 The ring plugs directly onto the GPIO header. Each LED is individually addressable; you cannot control them with simple digital on/off GPIO calls.
@@ -61,7 +62,7 @@ LED_COUNT = 10
 LED_PIN = 18
 LED_FREQ_HZ = 800000
 LED_DMA = 10
-LED_BRIGHTNESS = 255
+LED_BRIGHTNESS = 150  # KanoHatLeds default
 LED_INVERT = False
 LED_CHANNEL = 0
 
@@ -145,7 +146,18 @@ Uses Kano's `make_light` Python API. Useful only if you also have a lightboard �
 2. **Run with `sudo`** — `rpi_ws281x` needs root for DMA/PWM access.
 3. **Use DMA 10, not 5** — DMA channel 5 can conflict on Pi 3B.
 4. **Pin 18, not 21** — community reports vary, but Kano's official code and working community examples consistently use GPIO 18.
-5. **Color order** — WS2812 LEDs use GRB order by default; if colors look wrong, check `LED_STRIP_TYPE` / strip type settings.
+5. **Color order** — WS2812 LEDs use GRB order by default; if colors look wrong, try `KANO_RING_STRIP_TYPE=rgb`.
+6. **Disable onboard audio** — GPIO 18 PWM conflicts with the Pi audio driver. If only the first few LEDs light, or the ring flickers, add `dtparam=audio=off` to `/boot/firmware/config.txt` (or `/boot/config.txt` on older images), reboot, and retest. Kano OS often avoided this clash.
+7. **Brightness** — Kano's `KanoHatLeds` defaults to **150**, not 255. Full brightness on the Pi's 5V rail can brown out later LEDs in the chain so only ~half the ring lights.
+
+## Only half the ring lights?
+
+Kano's driver is a single strip of 10 on GPIO 18 (`Adafruit_NeoPixel(10, 18, dma=10)`). There is no second data pin for the other five LEDs. If five never light:
+
+1. Run `sudo .venv/bin/python3 scripts/led_walk.py` and note which **indices** light.
+2. Retry at low brightness: `KANO_RING_BRIGHTNESS=40 sudo -E .venv/bin/python3 scripts/fill_all.py`
+3. Disable audio (pitfall 6) and reboot.
+4. If indices 0–4 always work and 5–9 never do (at any brightness), the daisy-chain between those LEDs is likely broken — software cannot fix that.
 
 ## Recommended Path
 

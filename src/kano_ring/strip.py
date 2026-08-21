@@ -69,25 +69,58 @@ def is_mock_mode() -> bool:
     return _MOCK_MODE
 
 
+def _resolve_strip_type(name: str | None):
+    """Map a short name to an rpi_ws281x strip_type constant, or None for default."""
+    if name is None:
+        return None
+
+    # Imported only when building a real strip.
+    import rpi_ws281x as ws  # type: ignore[import-untyped]
+
+    key = name.strip().lower()
+    mapping = {
+        "grb": ws.WS2811_STRIP_GRB,
+        "rgb": ws.WS2811_STRIP_RGB,
+        "gbr": ws.WS2811_STRIP_GBR,
+        "rgbw": getattr(ws, "SK6812_STRIP_RGBW", None),
+    }
+    if key not in mapping or mapping[key] is None:
+        known = ", ".join(sorted(k for k, v in mapping.items() if v is not None))
+        raise ValueError(f"Unknown strip type {name!r}; expected one of: {known}")
+    return mapping[key]
+
+
 def create_strip(config: KanoRingConfig | None = None) -> PixelStripProtocol:
-    """Create a real or mock PixelStrip depending on available hardware."""
+    """Create a real or mock PixelStrip depending on available hardware.
+
+    Real-hardware construction mirrors Kano's ``KanoHatLeds``: count, pin,
+    and ``dma=10``, with brightness applied via the constructor (equivalent
+    to their ``setBrightness`` call before ``begin``).
+    """
     global _MOCK_MODE
 
-    cfg = config or KanoRingConfig()
+    cfg = config or KanoRingConfig.from_env()
 
     try:
-        from rpi_ws281x import PixelStrip  # type: ignore[import-untyped]
-
-        _MOCK_MODE = False
-        return PixelStrip(
-            cfg.led_count,
-            cfg.led_pin,
-            cfg.led_freq_hz,
-            cfg.led_dma,
-            cfg.led_invert,
-            cfg.led_brightness,
-            cfg.led_channel,
-        )
+        # Adafruit_NeoPixel is the name Kano imported; it is an alias for PixelStrip.
+        from rpi_ws281x import Adafruit_NeoPixel  # type: ignore[import-untyped]
     except Exception:
         _MOCK_MODE = True
         return MockPixelStrip(cfg)
+
+    _MOCK_MODE = False
+    strip_kwargs: dict = {
+        "num": cfg.led_count,
+        "pin": cfg.led_pin,
+        "freq_hz": cfg.led_freq_hz,
+        "dma": cfg.led_dma,
+        "invert": cfg.led_invert,
+        "brightness": cfg.led_brightness,
+        "channel": cfg.led_channel,
+    }
+    strip_type = _resolve_strip_type(cfg.strip_type)
+    if strip_type is not None:
+        strip_kwargs["strip_type"] = strip_type
+
+    # Prefer keyword args (as in KanoHatLeds) so dma/brightness stay unambiguous.
+    return Adafruit_NeoPixel(**strip_kwargs)
