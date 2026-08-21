@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fill the ring with a diagnostic two-tone pattern.
 
-Indices 0-4 = red, 5-9 = blue so you can see which half of the chain
-responds. Matches KanoHatLeds brightness (150) by default.
+Lights the configured ring (default 5 LEDs) in a two-tone split for
+diagnostics. Matches KanoHatLeds brightness (150) by default.
 
 On a Pi::
 
@@ -41,16 +41,15 @@ def main() -> None:
     off = _color(0, 0, 0)
     mode = "mock" if is_mock_mode() else "hardware"
 
+    split = n // 2
     for index in range(n):
-        strip.setPixelColor(index, red if index < 5 else blue)
+        strip.setPixelColor(index, red if index < split else blue)
     strip.show()
 
     print(
         f"Set {n} pixels (pin={cfg.led_pin}, brightness={cfg.led_brightness}, {mode}).\n"
-        "  0-4 = RED, 5-9 = BLUE.\n"
-        "  Only one color = that index range is the live half of the chain.\n"
-        "  Both colors = all 10 addressable.\n"
-        "Ctrl+C to clear. Next: sudo .venv/bin/python3 scripts/probe_half_ring.py"
+        f"  indices 0-{split - 1} = RED, {split}-{n - 1} = BLUE.\n"
+        "Ctrl+C to clear."
     )
 
     try:

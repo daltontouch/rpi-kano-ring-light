@@ -15,12 +15,13 @@ def _env_int(name: str, default: int) -> int:
 class KanoRingConfig:
     """Hardware settings for the Kano Computer Kit light ring.
 
-    Defaults match Kano's ``KanoHatLeds`` (10 LEDs, GPIO 18, DMA 10,
-    brightness 150). Override with env vars when probing on a Pi:
-    ``KANO_RING_PIN``, ``KANO_RING_BRIGHTNESS``, ``KANO_RING_DMA``.
+    Defaults use 5 LEDs (working half of the physical 10-LED ring), GPIO 18,
+    DMA 10, brightness 150. Override with env vars on a Pi:
+    ``KANO_RING_COUNT``, ``KANO_RING_PIN``, ``KANO_RING_BRIGHTNESS``,
+    ``KANO_RING_DMA``.
     """
 
-    led_count: int = 10
+    led_count: int = 5
     led_pin: int = 18
     led_freq_hz: int = 800_000
     led_dma: int = 10
@@ -36,7 +37,7 @@ class KanoRingConfig:
         """Build config from defaults plus optional environment overrides."""
         base = cls()
         return cls(
-            led_count=base.led_count,
+            led_count=_env_int("KANO_RING_COUNT", base.led_count),
             led_pin=_env_int("KANO_RING_PIN", base.led_pin),
             led_freq_hz=base.led_freq_hz,
             led_dma=_env_int("KANO_RING_DMA", base.led_dma),

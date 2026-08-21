@@ -1,6 +1,6 @@
 # Agent Instructions
 
-This repository controls the Kano Computer Kit light ring (10 WS2812 NeoPixels on GPIO 18) on a Raspberry Pi 3B.
+This repository controls the Kano Computer Kit light ring (5 active WS2812 NeoPixels on GPIO 18 by default; physical ring has 10) on a Raspberry Pi 3B.
 
 ## Cursor Cloud specific instructions
 

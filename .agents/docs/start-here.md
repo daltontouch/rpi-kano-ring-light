@@ -7,7 +7,7 @@ Research notes for controlling the Kano Computer Kit light ring on a Raspberry P
 | Setting | Value |
 |---------|-------|
 | LED type | WS2812 / NeoPixel (addressable RGB) |
-| LED count | 10 |
+| LED count | 5 (working half; ring has 10 physically; set `KANO_RING_COUNT=10` to probe all) |
 | Data pin | GPIO 18 (BCM) / physical pin 12 |
 | Hat button | GPIO 3 (BCM) / physical pin 5 |
 | Driver library | `rpi_ws281x` (not `gpiozero`) |

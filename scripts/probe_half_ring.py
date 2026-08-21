@@ -59,20 +59,18 @@ def phase_split_colors(cfg: KanoRingConfig, hold: float) -> None:
         f"numPixels()={n}, brightness={cfg.led_brightness}, "
         f"dma={cfg.led_dma}, mock={is_mock_mode()}"
     )
-    if n != 10:
-        print(f"WARNING: expected 10 pixels, got {n}")
-
+    split = n // 2
     red = _color(255, 0, 0)
     blue = _color(0, 0, 255)
     for i in range(n):
-        strip.setPixelColor(i, red if i < 5 else blue)
+        strip.setPixelColor(i, red if i < split else blue)
     strip.show()
     _hold(
         hold,
-        "Indices 0-4 = RED, 5-9 = BLUE.\n"
-        "  Only red  = first half of the chain works (break after LED 4).\n"
-        "  Only blue = unexpected; note which arc lit.\n"
-        "  Both colors = all 10 are addressable (look elsewhere).\n"
+        f"Indices 0-{split - 1} = RED, {split}-{n - 1} = BLUE.\n"
+        "  Only red  = lower indices respond.\n"
+        "  Only blue = upper indices respond.\n"
+        "  Both colors = full configured count is addressable.\n"
         "  Mixed/dim = signal or power issue.",
     )
     _clear(strip)

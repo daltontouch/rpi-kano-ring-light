@@ -1,4 +1,5 @@
 from kano_ring import create_strip
+from kano_ring.config import KanoRingConfig
 from kano_ring.racing_red import (
     TRAIL_BRIGHTNESS,
     apply_racing_red_frame,
@@ -8,26 +9,28 @@ from kano_ring.racing_red import (
 )
 from kano_ring.strip import MockColor
 
+RING = KanoRingConfig().led_count  # default ring size (5)
+
 
 def test_trail_indices_wrap_around_full_ring() -> None:
-    assert trail_indices(10, 0, trail_length=3) == [0, 9, 8]
-    assert trail_indices(10, 1, trail_length=3) == [1, 0, 9]
+    assert trail_indices(RING, 0, trail_length=3) == [0, 4, 3]
+    assert trail_indices(RING, 1, trail_length=3) == [1, 0, 4]
 
 
-def test_frame_period_covers_all_ten_leds() -> None:
-    """Each offset must be unique so the chase visits the whole ring."""
-    frames = [tuple(frame_colors(10, offset)) for offset in range(10)]
-    assert len(set(frames)) == 10
+def test_frame_period_covers_all_ring_leds() -> None:
+    """Each offset must be unique so the chase visits every active LED."""
+    frames = [tuple(frame_colors(RING, offset)) for offset in range(RING)]
+    assert len(set(frames)) == RING
 
     heads = [frame.index((255, 0, 0)) for frame in frames]
-    assert heads == list(range(10))
+    assert heads == list(range(RING))
 
 
 def test_frame_colors_use_fading_red_trail() -> None:
-    colors = frame_colors(10, 0)
+    colors = frame_colors(RING, 0)
     assert colors[0] == (TRAIL_BRIGHTNESS[0], 0, 0)
-    assert colors[9] == (TRAIL_BRIGHTNESS[1], 0, 0)
-    assert colors[8] == (TRAIL_BRIGHTNESS[2], 0, 0)
+    assert colors[4] == (TRAIL_BRIGHTNESS[1], 0, 0)
+    assert colors[3] == (TRAIL_BRIGHTNESS[2], 0, 0)
     assert colors[1] == (0, 0, 0)
     assert all(g == 0 and b == 0 for _, g, b in colors)
 
