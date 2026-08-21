@@ -152,12 +152,13 @@ Uses Kano's `make_light` Python API. Useful only if you also have a lightboard �
 
 ## Only half the ring lights?
 
-Kano's driver is a single strip of 10 on GPIO 18 (`Adafruit_NeoPixel(10, 18, dma=10)`). There is no second data pin for the other five LEDs. If five never light:
+Kano's driver is a single strip of 10 on GPIO 18 (`Adafruit_NeoPixel(10, 18, dma=10)`). Official code does **not** drive a second data pin. If five never light:
 
-1. Run `sudo .venv/bin/python3 scripts/led_walk.py` and note which **indices** light.
-2. Retry at low brightness: `KANO_RING_BRIGHTNESS=40 sudo -E .venv/bin/python3 scripts/fill_all.py`
-3. Disable audio (pitfall 6) and reboot.
-4. If indices 0–4 always work and 5–9 never do (at any brightness), the daisy-chain between those LEDs is likely broken — software cannot fix that.
+1. Run `sudo .venv/bin/python3 scripts/fill_all.py` — **0–4 red, 5–9 blue**. Report which color(s) you see.
+2. Run `sudo .venv/bin/python3 scripts/probe_half_ring.py` — also tries GPIO 21 alone and a dual 5+5 (18+21) layout.
+3. Disable audio (pitfall 6) and reboot, then retest.
+4. Retry dim: `KANO_RING_BRIGHTNESS=40 sudo -E .venv/bin/python3 scripts/fill_all.py`
+5. If only red (indices 0–4) ever appears on pin 18, the daisy-chain or 5V/GND after LED 4 is likely open — that is a hardware fault software cannot fix.
 
 ## Recommended Path
 

@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Fill every LED solid red — quick check that all 10 respond.
+"""Fill the ring with a diagnostic two-tone pattern.
 
-Matches KanoHatLeds brightness (150) by default. On a Pi::
+Indices 0-4 = red, 5-9 = blue so you can see which half of the chain
+responds. Matches KanoHatLeds brightness (150) by default.
+
+On a Pi::
 
     sudo .venv/bin/python3 scripts/fill_all.py
     KANO_RING_BRIGHTNESS=40 sudo -E .venv/bin/python3 scripts/fill_all.py
+
+For pin / dual-chain checks, use scripts/probe_half_ring.py.
 """
 
 from __future__ import annotations
@@ -30,24 +35,29 @@ def main() -> None:
     strip = create_strip(cfg)
     strip.begin()
 
+    n = strip.numPixels()
     red = _color(255, 0, 0)
+    blue = _color(0, 0, 255)
     off = _color(0, 0, 0)
     mode = "mock" if is_mock_mode() else "hardware"
 
-    for index in range(strip.numPixels()):
-        strip.setPixelColor(index, red)
+    for index in range(n):
+        strip.setPixelColor(index, red if index < 5 else blue)
     strip.show()
+
     print(
-        f"All {strip.numPixels()} LEDs red "
-        f"(pin={cfg.led_pin}, brightness={cfg.led_brightness}, {mode}). "
-        "Ctrl+C to clear."
+        f"Set {n} pixels (pin={cfg.led_pin}, brightness={cfg.led_brightness}, {mode}).\n"
+        "  0-4 = RED, 5-9 = BLUE.\n"
+        "  Only one color = that index range is the live half of the chain.\n"
+        "  Both colors = all 10 addressable.\n"
+        "Ctrl+C to clear. Next: sudo .venv/bin/python3 scripts/probe_half_ring.py"
     )
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        for index in range(strip.numPixels()):
+        for index in range(n):
             strip.setPixelColor(index, off)
         strip.show()
         print("Cleared.")
