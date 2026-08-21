@@ -30,3 +30,7 @@ echo "  sudo .venv/bin/python3 scripts/rainbow_demo.py"
 echo
 echo "Option C — wrapper script:"
 echo "  sudo ./scripts/run_pi.sh scripts/rainbow_demo.py"
+echo
+echo "Run racing red on boot (systemd):"
+echo "  sudo ./scripts/install_racing_red_service.sh"
+echo "  sudo systemctl start kano-racing-red.service"

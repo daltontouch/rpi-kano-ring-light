@@ -1,0 +1,15 @@
+[Unit]
+Description=Kano ring racing red animation
+After=multi-user.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=@REPO_ROOT@
+Environment=PYTHONUNBUFFERED=1
+ExecStart=@REPO_ROOT@/.venv/bin/python3 @REPO_ROOT@/scripts/racing_red.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

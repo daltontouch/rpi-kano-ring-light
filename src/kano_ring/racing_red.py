@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import signal
 import time
 from typing import Callable
 
@@ -73,16 +74,25 @@ def run_racing_red(
     delay: float = 0.08,
     trail: tuple[int, ...] = TRAIL_BRIGHTNESS,
 ) -> None:
-    """Race a red trail around the full ring until interrupted with Ctrl+C."""
+    """Race a red trail around the full ring until interrupted (Ctrl+C or SIGTERM)."""
     strip.begin()
     offset = 0
     num_pixels = strip.numPixels()
+    stop_requested = False
+
+    def _request_stop(signum: int, frame) -> None:
+        del signum, frame
+        nonlocal stop_requested
+        stop_requested = True
+
+    signal.signal(signal.SIGTERM, _request_stop)
+    signal.signal(signal.SIGINT, _request_stop)
 
     try:
-        while True:
+        while not stop_requested:
             apply_racing_red_frame(strip, offset, trail=trail)
             strip.show()
             time.sleep(delay)
             offset = (offset + 1) % num_pixels
-    except KeyboardInterrupt:
+    finally:
         clear_strip(strip)
